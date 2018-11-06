@@ -138,4 +138,4 @@ def train(epochs=1, batch_size=128):
             plot_generated_images(e, generator)
 
 if __name__ == '__main__':
-    train(400, 128)
+    train(4, 128)
