@@ -16,7 +16,7 @@ from keras import initializers
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 # To make sure that we can reproduce the experiment and get the same results
-np.random.seed(10)
+np.random.seed(9)
 
 # The dimension of our random noise vector.
 random_dim = 100
@@ -138,4 +138,4 @@ def train(epochs=1, batch_size=128):
             plot_generated_images(e, generator)
 
 if __name__ == '__main__':
-    train(100, 128)
+    train(45, 128)
