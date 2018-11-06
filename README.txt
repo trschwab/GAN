@@ -1,1 +1,1 @@
-A repository for a generative adversarial neural network. Generally code from a group project for my AI/cognitive science course.
+A repository for a generative adversarial neural network. Team work in my CSCI 379 course.
