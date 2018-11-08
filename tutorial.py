@@ -2,13 +2,14 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import math
 
 
 from keras.layers import Input
 from keras.models import Model, Sequential
 from keras.layers.core import Dense, Dropout
 from keras.layers.advanced_activations import LeakyReLU
-from keras.datasets import mnist
+from keras.datasets import mnist, cifar10
 from keras.optimizers import Adam
 from keras import initializers
 
@@ -21,15 +22,33 @@ np.random.seed(10)
 # The dimension of our random noise vector.
 random_dim = 100
 
+image_height = 1
+image_width = 1
+image_depth = 1
+image_size = 1
+
 def load_minst_data():
     # load the data
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    (x_train, _), (_, _) = cifar10.load_data()
+
+    #Setup the dimensions of the images
+    global image_width
+    global image_height
+    global image_depth
+    global image_size
+    image_width = x_train.shape[1]
+    image_height = x_train.shape[2]
+    if len(x_train.shape) > 3:
+        image_depth = x_train.shape[3]
+    #Find the dimension of the image flattened out
+    image_size = image_height * image_width * image_depth
+
     # normalize our inputs to be in the range[-1, 1]
     x_train = (x_train.astype(np.float32) - 127.5)/127.5
     # convert x_train with a shape of (60000, 28, 28) to (60000, 784) so we have
     # 784 columns per row
-    x_train = x_train.reshape(60000, 784)
-    return (x_train, y_train, x_test, y_test)
+    x_train = x_train.reshape(x_train.shape[0], image_size)
+    return x_train
 
 # You will use the Adam optimizer
 def get_optimizer():
@@ -46,13 +65,13 @@ def get_generator(optimizer):
     generator.add(Dense(1024))
     generator.add(LeakyReLU(0.2))
 
-    generator.add(Dense(784, activation='tanh'))
+    generator.add(Dense(image_size, activation='tanh'))
     generator.compile(loss='binary_crossentropy', optimizer=optimizer)
     return generator
 
 def get_discriminator(optimizer):
     discriminator = Sequential()
-    discriminator.add(Dense(1024, input_dim=784, kernel_initializer=initializers.RandomNormal(stddev=0.02)))
+    discriminator.add(Dense(1024, input_dim=image_size, kernel_initializer=initializers.RandomNormal(stddev=0.02)))
     discriminator.add(LeakyReLU(0.2))
     discriminator.add(Dropout(0.3))
 
@@ -86,7 +105,7 @@ def get_gan_network(discriminator, random_dim, generator, optimizer):
 def plot_generated_images(epoch, generator, examples=100, dim=(10, 10), figsize=(10, 10)):
     noise = np.random.normal(0, 1, size=[examples, random_dim])
     generated_images = generator.predict(noise)
-    generated_images = generated_images.reshape(examples, 28, 28)
+    generated_images = generated_images.reshape(examples, image_width, image_height, image_depth)
 
     plt.figure(figsize=figsize)
     for i in range(generated_images.shape[0]):
@@ -98,7 +117,7 @@ def plot_generated_images(epoch, generator, examples=100, dim=(10, 10), figsize=
 
 def train(epochs=1, batch_size=128):
     # Get the training and testing data
-    x_train, y_train, x_test, y_test = load_minst_data()
+    x_train = load_minst_data()
     # Split the training data into batches of size 128
     batch_count = x_train.shape[0] / batch_size
 
@@ -108,9 +127,9 @@ def train(epochs=1, batch_size=128):
     discriminator = get_discriminator(adam)
     gan = get_gan_network(discriminator, random_dim, generator, adam)
 
-    for e in xrange(1, epochs+1):
+    for e in range(1, epochs+1):
         print('-'*15, 'Epoch %d' % e, '-'*15)
-        for _ in tqdm(xrange(batch_count)):
+        for _ in tqdm(range(math.ceil(batch_count))):
             # Get a random set of input noise and images
             noise = np.random.normal(0, 1, size=[batch_size, random_dim])
             image_batch = x_train[np.random.randint(0, x_train.shape[0], size=batch_size)]
@@ -136,6 +155,7 @@ def train(epochs=1, batch_size=128):
 
         if e == 1 or e % 20 == 0:
             plot_generated_images(e, generator)
+    plot_generated_images(epochs, generator)
 
 if __name__ == '__main__':
-    train(400, 128)
+    train(5, 128)
