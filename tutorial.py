@@ -17,7 +17,7 @@ from keras import initializers
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
 # To make sure that we can reproduce the experiment and get the same results
-np.random.seed(10)
+np.random.seed(9)
 
 # The dimension of our random noise vector.
 random_dim = 100
