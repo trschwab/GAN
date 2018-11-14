@@ -143,7 +143,6 @@ def get_gan_network(discriminator, random_dim, generator, optimizer):
 def plot_generated_images(epoch, generator, examples=100, dim=(10, 10), figsize=(10, 10)):
     noise = np.random.normal(0, 1, size=[examples, random_dim])
     generated_images = generator.predict(noise)
-    print(generated_images.shape)
 
     plt.figure(figsize=figsize)
     for i in range(generated_images.shape[0]):
