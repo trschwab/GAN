@@ -190,9 +190,9 @@ def train(epochs=1, batch_size=128):
             discriminator.trainable = False
             gan.train_on_batch(noise, y_gen)
 
-        if e == 1 or e % 5 == 0:
+        if e == 1 or e % 20 == 0:
             plot_generated_images(e, generator)
     plot_generated_images(epochs, generator)
 
 if __name__ == '__main__':
-    train(40, 128)
+    train(400, 128)
