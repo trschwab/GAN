@@ -10,10 +10,10 @@ For some reason, every generated images looked the exact same (mode collapse) an
 The GAN is setup to run with cifar10 properly.
 First, ensure you have all dependencies installed. They can all be installed with pip. You will need:
 
-tensorflow
-keras
-matplotlib
-numpy
+tensorflow,
+keras,
+matplotlib,
+numpy,
 tqdm
 
 Next, simply run with python 3:
