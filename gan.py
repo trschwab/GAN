@@ -30,14 +30,14 @@ import os
 # x_train = np.array(images)
 # np.save("images.npy", x_train)
 
-x_train = np.load('images.npy')
-print(x_train.shape)
+#x_train = np.load('images.npy')
+#print(x_train.shape)
 
 # import the data
-#(x_train, _), (_, _) = cifar10.load_data()
+(x_train, _), (_, _) = cifar10.load_data()
 
 #reduce the inputs to be in range [0, 1]
-#x_train = x_train / 255
+x_train = x_train / 255
 
 class I_Think_I_GAN:
     def __init__(self, dim=100):
@@ -46,7 +46,7 @@ class I_Think_I_GAN:
     def inputs(self):
         # define the input placeholders
         gen_input = tf.placeholder(shape=(None, self.input_dim), dtype=tf.float32)
-        real_input = tf.placeholder(shape=(None, 50, 50, 3), dtype=tf.float32)
+        real_input = tf.placeholder(shape=(None, 32, 32, 3), dtype=tf.float32)
 
         return gen_input, real_input
 
@@ -88,20 +88,20 @@ class I_Think_I_GAN:
     def generator(self, input_layer, reuse=False, lrelu_slope=0.2, training=True):
         with tf.variable_scope('generator', reuse=reuse):
             # first layer
-            input_dense = tf.layers.dense(inputs=input_layer, units=2*2*625)
-            input_volume = tf.reshape(tensor=input_dense, shape=(-1, 2, 2, 625))
+            input_dense = tf.layers.dense(inputs=input_layer, units=2*2*256)
+            input_volume = tf.reshape(tensor=input_dense, shape=(-1, 2, 2, 256))
             layer1 = tf.layers.batch_normalization(inputs=input_volume, training=training)
             layer1 = tf.maximum(layer1 * lrelu_slope, layer1)
             # second layer
-            layer2 = tf.layers.conv2d_transpose(filters=300, strides=2, kernel_size=5, padding='same', inputs=layer1)
+            layer2 = tf.layers.conv2d_transpose(filters=128, strides=2, kernel_size=5, padding='same', inputs=layer1)
             layer2 = tf.layers.batch_normalization(inputs=layer2, training=training)
             layer2 = tf.maximum(layer2 * lrelu_slope, layer2)
             # third layer
-            layer3 = tf.layers.conv2d_transpose(filters=150, strides=2, kernel_size=5, padding='same', inputs=layer2)
+            layer3 = tf.layers.conv2d_transpose(filters=64, strides=2, kernel_size=5, padding='same', inputs=layer2)
             layer3 = tf.layers.batch_normalization(inputs=layer3, training=training)
             layer3 = tf.maximum(layer3 * lrelu_slope, layer3)
             # fourth layer
-            layer4 = tf.layers.conv2d_transpose(filters=50, strides=2, kernel_size=5, padding='same', inputs=layer3)
+            layer4 = tf.layers.conv2d_transpose(filters=32, strides=2, kernel_size=5, padding='same', inputs=layer3)
             layer4 = tf.layers.batch_normalization(inputs=layer4, training=training)
             layer4 = tf.maximum(layer4 * lrelu_slope, layer4)
             # final layer
@@ -114,22 +114,22 @@ class I_Think_I_GAN:
     def discriminator(self, input_layer, reuse=False, lrelu_slope=0.2):
         with tf.variable_scope('discriminator', reuse=reuse):
             # first layer
-            layer1 = tf.layers.conv2d(inputs=input_layer, filters=50, strides=2, kernel_size=5, padding='same')
+            layer1 = tf.layers.conv2d(inputs=input_layer, filters=32, strides=2, kernel_size=5, padding='same')
             layer1 = tf.maximum(layer1 * lrelu_slope, layer1)
             # second layer
-            layer2 = tf.layers.conv2d(inputs=layer1, filters=150, strides=2, kernel_size=5, padding='same')
+            layer2 = tf.layers.conv2d(inputs=layer1, filters=64, strides=2, kernel_size=5, padding='same')
             layer2 = tf.layers.batch_normalization(inputs=layer2, training=True)
             layer2 = tf.maximum(layer2 * lrelu_slope, layer2)
             # third layer
-            layer3 = tf.layers.conv2d(inputs=layer2, filters=300, strides=2, kernel_size=5, padding='same')
+            layer3 = tf.layers.conv2d(inputs=layer2, filters=128, strides=2, kernel_size=5, padding='same')
             layer3 = tf.layers.batch_normalization(inputs=layer3, training=True)
             layer3 = tf.maximum(layer3 * lrelu_slope, layer3)
             #fourth layer
-            layer4 = tf.layers.conv2d(inputs=layer3, filters=625, strides=2, kernel_size=5, padding='same')
+            layer4 = tf.layers.conv2d(inputs=layer3, filters=256, strides=2, kernel_size=5, padding='same')
             layer4 = tf.layers.batch_normalization(inputs=layer4, training=True)
             layer4 = tf.maximum(layer4 * lrelu_slope, layer4)
             # flatten the array
-            flatten = tf.reshape(tensor=layer4, shape=(-1, 2*2*625))
+            flatten = tf.reshape(tensor=layer4, shape=(-1, 2*2*256))
             # final layer
             final = tf.layers.dense(inputs=flatten, units=1)
             return final
